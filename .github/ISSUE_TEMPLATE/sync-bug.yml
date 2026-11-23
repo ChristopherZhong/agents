@@ -1,0 +1,33 @@
+name: Sync defect
+description: Report a problem with the sync procedure
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: The commit recorded in .agents/config.yaml
+  - type: dropdown
+    id: case
+    attributes:
+      label: Which case was it?
+      options:
+        - New upstream file
+        - Removed upstream
+        - Deleted locally
+        - Both changed
+        - Rename
+        - Collision
+        - Exclude
+        - Other

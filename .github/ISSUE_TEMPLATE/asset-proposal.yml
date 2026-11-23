@@ -1,0 +1,41 @@
+name: Asset proposal
+description: Propose a new rule, skill, prompt, or agent for the payload
+labels: [proposal]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Asset name
+      description: Follow .agents/rules/naming-conventions.rule.md
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [Rule, Skill, Prompt, Agent]
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve?
+      description: Describe the task it handles, in any repository.
+    validations:
+      required: true
+  - type: textarea
+    id: genericity
+    attributes:
+      label: Why is it repository-agnostic?
+      description: Explain why it belongs in the payload rather than one repository.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: The name follows the naming conventions rule.
+          required: true
+        - label: It contains no repository-specific text.
+          required: true
