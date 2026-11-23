@@ -151,9 +151,25 @@ Preserve the executable bit reported by git.
 
 ## Step 9 — Update state
 
-Write `.agents/config.yaml` with the new `commit` and any newly excluded paths,
-sorted. The commit must be the full 40-character SHA, exactly as reported by
-`git -C <tmpdir> rev-parse HEAD`. An abbreviated SHA fails validation.
+Write `.agents/config.yaml` with any newly excluded paths, sorted.
+
+Advance `commit` only when the payload changed. Compare the recorded commit to
+the new one:
+
+```
+git -C <tmpdir> diff --quiet <old> <new> -- agents/
+```
+
+Exit status 0 means the payload is identical, so keep the recorded commit
+unchanged. Otherwise record the new commit as the full 40-character SHA, exactly
+as reported by `git -C <tmpdir> rev-parse HEAD`. An abbreviated SHA fails
+validation.
+
+A sync commit changes only `.agents/`, so it advances HEAD without changing the
+payload. Recording it unconditionally would make every sync invalidate the
+commit it just recorded and produce an endless series of config-only commits.
+
+On a first run there is no recorded commit. Record the new one.
 
 ## Step 10 — Validate
 
@@ -162,4 +178,5 @@ Run `.agents/scripts/validate.py` and report its output verbatim.
 ## Output
 
 Report per path: created, updated, merged, renamed, excluded, kept, or awaiting
-a decision. State the previous and new commit.
+a decision. State the previous and new commit, or state that the recorded commit
+is unchanged because the payload did not change.
