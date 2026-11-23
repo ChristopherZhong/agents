@@ -1,0 +1,3 @@
+agents:
+  upstream: https://github.com/ChristopherZhong/agents
+  commit: e8727dd7cc45c9eb4e2f952d7ac54fcad8993fd0
