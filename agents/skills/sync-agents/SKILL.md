@@ -106,7 +106,8 @@ git -C <tmpdir> diff --name-status -M <commit> HEAD -- agents/
 
 For a rename, move the local file from the old target to the new target, then
 merge with base = payload at `<old>` and theirs = payload at `<new>`. Report it
-as **one** decision.
+as **one** decision. Remove the old parent directory when the move leaves it
+empty.
 
 If the new target already exists locally, treat it as a collision.
 
@@ -135,14 +136,19 @@ not default to either side.
 
 ## Step 7 — Merge
 
-For both-changed files and renames:
+Merge into a scratch copy. `git merge-file` rewrites its first argument, so
+merging in place would leave conflict markers in the consumer's file.
 
 ```
-git merge-file --diff3 <local> <base> <theirs>
+cp <local> <scratch>
+git merge-file --diff3 <scratch> <base> <theirs>
 ```
 
-Exit status 0 means clean. Non-zero means conflict: show the conflicting
-hunks, propose a resolution, and stop without writing.
+Exit status 0 means clean: move `<scratch>` over `<local>`.
+
+Non-zero means conflict: show the conflicting hunks from `<scratch>`, propose a
+resolution, and stop without writing. Delete `<scratch>`. The local file must be
+byte-identical to how it started.
 
 ## Step 8 — Write
 

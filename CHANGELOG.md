@@ -14,6 +14,7 @@ This project does not use semantic versions. Consumers pin a commit; see
 - `sync-agents` skill and `agents-maintainer` agent.
 - Governance: `CONTRIBUTING.md`, `SECURITY.md`, `docs/adr/`, support matrix,
   and non-goals.
+- Validator detects a stale self-sync copy in payload mode.
 
 ### Changed
 
@@ -28,3 +29,8 @@ This project does not use semantic versions. Consumers pin a commit; see
 - `mode` from frontmatter. Three-way merge provides create-once semantics.
 
 ### Fixed
+
+- A merge conflict no longer leaves conflict markers in the consumer's file.
+- A rename removes the source directory when the move leaves it empty.
+- The recorded commit advances only when the payload changes, so a sync commit
+  can no longer invalidate the commit it just recorded.
