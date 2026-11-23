@@ -381,6 +381,28 @@ def check_config(root: Path, payload_mode: bool):
     return findings
 
 
+def check_self_sync(root: Path, payload_mode: bool):
+    """In payload mode, every payload path must have an identical copy installed.
+
+    The installed copy may contain extra repository-owned files; only the
+    payload-to-installed direction is enforced.
+    """
+    findings = []
+    if not payload_mode:
+        return findings
+    payload = root / "agents"
+    if not (root / ".agents").is_dir():
+        return findings
+    for path in walk_dir(payload):
+        target = payload_target(path.relative_to(payload).as_posix())
+        candidate = root / target
+        if not candidate.is_file():
+            findings.append((path, "error", f"self-sync missing: {target}"))
+        elif candidate.read_bytes() != path.read_bytes():
+            findings.append((path, "error", f"self-sync stale: {target}"))
+    return findings
+
+
 def check_genericity(root: Path, payload_mode: bool):
     findings = []
     payload = root / "agents"
@@ -460,7 +482,7 @@ def main() -> int:
         check_config,
     ]
     if payload_mode:
-        checks += [check_genericity, check_payload]
+        checks += [check_self_sync, check_genericity, check_payload]
 
     findings = []
     for check in checks:
