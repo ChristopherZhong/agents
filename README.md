@@ -8,13 +8,22 @@ repository adopts them by pointing its agent at this one.
 
 ## Start here
 
-Copy this into your agent:
+Paste this into your agent. The copy button is at the top right of the block.
 
-> Onboard this repository using the agents harness at
-> `https://github.com/ChristopherZhong/agents`.
->
-> Clone it, read `agents/skills/sync-agents/SKILL.md`, and follow it.
-> Ask me before writing any file.
+```text
+Onboard this repository using the agents harness.
+
+Upstream: https://github.com/ChristopherZhong/agents
+
+1. Clone the upstream repository into a temporary directory outside this one.
+2. Read agents/skills/sync-agents/SKILL.md and follow it exactly.
+3. Ask me before writing any file. Stop if any step is ambiguous.
+
+Do not commit anything.
+
+When you finish, run .agents/scripts/validate.py and report its output, the
+files you created or changed, and anything you had to infer.
+```
 
 On a repository with no `.agents/` directory, that is a first run: files are
 created. On a repository that already syncs, it is an update: changes are
