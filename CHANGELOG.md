@@ -34,3 +34,6 @@ This project does not use semantic versions. Consumers pin a commit; see
 - A rename removes the source directory when the move leaves it empty.
 - The recorded commit advances only when the payload changes, so a sync commit
   can no longer invalidate the commit it just recorded.
+- The sync skill states where the upstream URL comes from on a first run, skips
+  the base check when there is no base, and defines the candidate path set as
+  the union of payload and on-disk paths.

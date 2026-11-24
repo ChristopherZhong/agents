@@ -19,7 +19,9 @@ without discarding any deliberate local decision.
 ## Inputs
 
 - `.agents/config.yaml` — may be absent.
-- The upstream repository named by `agents.upstream`.
+- The upstream URL. Use `agents.upstream` when `config.yaml` exists. On a first
+  run there is no config, so the URL must come from the user or from the
+  instructions that asked for the sync.
 - The payload directory `agents/` in that repository.
 
 ## Step 1 — Load state
@@ -34,8 +36,8 @@ agents:
 ```
 
 If the file is missing, or `commit` cannot be read, this is a **first run**.
-A first run has no base: every payload file is either new or a collision.
-Skip Step 5 entirely on a first run.
+A first run has no base: treat **B** as false for every path, so every payload
+file is either new or a collision. Skip Step 5 entirely on a first run.
 
 ## Step 2 — Fetch upstream
 
@@ -46,10 +48,16 @@ Clone into a temporary directory outside this repository. Do not pass
 git clone --quiet <upstream> <tmpdir>
 ```
 
-Resolve the target and confirm the base exists:
+Resolve the target:
 
 ```
 git -C <tmpdir> rev-parse HEAD
+```
+
+On a first run there is no base, so skip the base check. Otherwise confirm the
+recorded commit exists:
+
+```
 git -C <tmpdir> rev-parse --verify --quiet <commit>^{commit}
 ```
 
@@ -76,6 +84,11 @@ For each remaining target path, establish:
 - **B** — present in the payload at `commit`
 - **H** — present in the payload at HEAD
 - **L** — present on disk
+
+The candidate paths are the union of three sets: every path in the payload at
+`commit`, every path in the payload at HEAD, and every path already present on
+disk at its mapped location. Enumerating only the payload would miss files the
+consumer owns, and a file the consumer owns must never be touched.
 
 | B | H | L | Local vs base | Payload | Action |
 |---|---|---|---|---|---|
