@@ -1,5 +1,10 @@
 # agents
 
+[![License](https://img.shields.io/github/license/ChristopherZhong/agents)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/ChristopherZhong/agents)](https://github.com/ChristopherZhong/agents/commits/main)
+[![Requires](https://img.shields.io/badge/requires-git%20%2B%20python%203-informational)](#requirements)
+[![Sync](https://img.shields.io/badge/sync-three--way%20merge-blue)](#how-sync-behaves)
+
 A harness of agent conventions that any repository can sync.
 
 `agents` holds rules, skills, prompts, and agent definitions that are useful in
@@ -30,6 +35,11 @@ created. On a repository that already syncs, it is an update: changes are
 merged.
 
 The skill is the procedure. There is no binary to install.
+
+## Requirements
+
+- `git` — clone, diff, and three-way merge.
+- Python 3 — the validator. Standard library only, no packages.
 
 ## What gets installed
 
