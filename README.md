@@ -7,9 +7,10 @@
 
 A harness of agent conventions that any repository can sync.
 
-`agents` holds rules, skills, prompts, and agent definitions that are useful in
-any repository, plus the procedure for installing and updating them. A
-repository adopts them by pointing its agent at this one.
+`agents` holds rules, reference standards, skills, prompts, and agent
+definitions that are useful in any repository, plus the procedure for
+installing and updating them. A repository adopts them by pointing its agent at
+this one.
 
 ## Start here
 
@@ -50,10 +51,25 @@ The skill is the procedure. There is no binary to install.
 | `skills/` | `.agents/skills/` |
 | `prompts/` | `.agents/prompts/` |
 | `agents/` | `.agents/agents/` |
+| `references/` | `.agents/references/` |
 | `scripts/validate.py` | `.agents/scripts/validate.py` |
 
 A consumer's own files in `.agents/` are never touched. Only paths that exist
 in the payload are managed.
+
+The payload does not ship `.agents/context/`, `.agents/docs/`, or
+`.agents/sessions/`. The work-state convention creates them on demand. Session
+notes are not committed.
+
+## Work state
+
+- `.agents/sessions/` holds active scratch notes. Do not commit them. Add the
+  directory to the repository ignore file.
+- `.agents/context/` holds durable, verified notes about the repository.
+- `.agents/docs/` holds plans for non-trivial work.
+- Promote a durable decision that meets the ADR conditions to `docs/adr/`.
+- Read `.agents/references/work-state.reference.md` before you create or
+  update a work-state file.
 
 ## How sync behaves
 

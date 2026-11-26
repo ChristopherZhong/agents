@@ -36,6 +36,7 @@ Follow `.agents/rules/naming-conventions.rule.md`:
 - Agents: `<workflow>-<actor>.agent.md`
 - Prompts: `<descriptive-name>.prompt.md`
 - Rules: `<topic>.rule.md`
+- Reference documents: `<topic>.reference.md` under `agents/references/`
 
 ### No declared state
 

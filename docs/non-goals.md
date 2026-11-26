@@ -23,6 +23,10 @@ no immutable-tag policy to maintain.
 No `CLAUDE.md`, no `.cursor/rules/`, no `copilot-instructions.md`. A user whose
 harness does not read `AGENTS.md` may add a pointer manually.
 
+Tool neutrality is binding. The payload does not add harness-specific fields,
+adapters, or generated files. A consumer may add its own outside the managed
+paths.
+
 ## Not a package manager
 
 No dependency resolution, no transitive assets, and no lockfile beyond

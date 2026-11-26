@@ -11,13 +11,34 @@ This project does not use semantic versions. Consumers pin a commit; see
 
 - Initial payload: 5 rules, 11 skills, 9 prompts, 5 agents, and
   `scripts/validate.py`.
+- Documentation standards: `references/ears.reference.md`,
+  `references/asd-ste100.reference.md`, `review-ears`, `review-ste100`,
+  reviewer agents, and prompts.
+- Specification authoring: `create-prd`, `create-edd`, and `create-adr` skills
+  with templates, prompts, and agents.
+- `review-skill` skill, prompt, and `skill-reviewer` agent.
+- Work-state convention: `work-state` rule,
+  `references/work-state.reference.md`,
+  `references/context-format.reference.md`, `maintain-work-state` skill,
+  prompt, and `work-state-maintainer` agent.
+- Generic worktree workflow: `create-worktree` skill, prompt, and
+  `worktree-creator` agent.
+- `references/` as a payload directory, with a validator structure check.
 - `sync-agents` skill and `agents-maintainer` agent.
 - Governance: `CONTRIBUTING.md`, `SECURITY.md`, `docs/adr/`, support matrix,
   and non-goals.
+- ADR 0014 records the work-state layers and the promotion path.
 - Validator detects a stale self-sync copy in payload mode.
 
 ### Changed
 
+- `markdown.rule.md` now points at the canonical standards instead of repeating
+  them.
+- `conduct-interview` now supports specification review, repository grounding,
+  agreed-text recast, and durable decisions.
+- `git-workflow.rule.md` now routes worktree work to the `create-worktree`
+  skill.
+- AGENTS and README now document the context, plan, and session layers.
 - Prompt references now use the `.prompt.md` suffix everywhere.
 - Agent and skill names now match their directories.
 - Shell command examples no longer contain repository-specific commands.
