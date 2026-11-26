@@ -16,3 +16,10 @@ Team preferences and non-negotiable rules for contributors and automation:
 - Do not automatically commit changes. Always stage and wait for user review before committing.
 - When making automated edits, stage changes and commit them in the workspace, then verify resulting file contents before reporting completion.
 - All commit messages must follow the Conventional Commits specification.
+
+## Worktrees
+
+- Use `.agents/skills/create-worktree/SKILL.md` when the user asks for a
+  worktree or when repository policy requires one.
+- Do not remove a worktree or delete a branch without explicit approval.
+- Do not use force removal. Ask first.

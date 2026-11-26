@@ -17,3 +17,5 @@ alternatives that were rejected.
 | 0010 | Mixed `.agents/` directory |
 | 0011 | Payload mirrors the target |
 | 0012 | One shipped validator |
+| 0013 | Standards in a references directory |
+| 0014 | Work state layers by durability |

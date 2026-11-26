@@ -10,10 +10,10 @@ skill from the upstream harness and follow it.
 - Upstream location: `.agents/config.yaml` → `agents.upstream`
 - Last synced commit: `.agents/config.yaml` → `agents.commit`
 
-Do not hand-edit `.agents/rules/`, `.agents/skills/`, `.agents/prompts/`,
-`.agents/agents/`, or `.agents/scripts/` unless you intend to diverge from the
-harness. Local changes are preserved by three-way merge, but upstream edits to
-the same lines require a decision.
+Do not hand-edit `.agents/rules/`, `.agents/references/`, `.agents/skills/`,
+`.agents/prompts/`, `.agents/agents/`, or `.agents/scripts/` unless you intend
+to diverge from the harness. Local changes are preserved by three-way merge,
+but upstream edits to the same lines require a decision.
 
 ## Where things live
 
@@ -23,12 +23,17 @@ the same lines require a decision.
 | `.agents/skills/` | Reusable procedures |
 | `.agents/prompts/` | Short user-facing invocations |
 | `.agents/agents/` | Agent definitions |
+| `.agents/references/` | Durable standards loaded on demand |
+| `.agents/context/` | Durable notes, created on demand |
+| `.agents/docs/` | Plans, created on demand |
+| `.agents/sessions/` | Active session notes, ignored by git |
 | `.agents/scripts/` | Helper scripts |
 
 ## Core rules
 
 Read every file in `.agents/rules/` before acting. Those files are the source
-of truth for repository behavior. Do not duplicate them here.
+of truth for repository behavior. Do not duplicate them here. Load a file from
+`.agents/references/` only when a workflow asks for it.
 
 ## Uncertainty
 
