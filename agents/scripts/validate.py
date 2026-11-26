@@ -59,8 +59,14 @@ REFERENCE = re.compile(r"\.agents/[A-Za-z0-9_.\-/]+")
 EXPLICIT_ORDER = re.compile(r"^\s*(?:[2-9]|[1-9][0-9]+)\.\s")
 TEXT_SUFFIXES = {".md", ".py", ".sh", ".yml", ".yaml", ".json", ".txt"}
 
-# References that are created by sync rather than shipped in the payload.
+# References that are created by sync or on demand rather than shipped in the
+# payload.
 REFERENCE_EXEMPT = {".agents/config.yaml"}
+REFERENCE_EXEMPT_PREFIXES = (
+    ".agents/context/",
+    ".agents/docs/",
+    ".agents/sessions/",
+)
 
 
 # --- parsing ---------------------------------------------------------------
@@ -177,7 +183,7 @@ def check_structure(root: Path, payload_mode: bool):
         if not payload.is_dir():
             findings.append((Path("agents"), "error", "missing payload directory"))
             return findings
-        for name in ("rules", "skills", "prompts", "agents", "scripts"):
+        for name in ("rules", "skills", "prompts", "agents", "references", "scripts"):
             if not (payload / name).is_dir():
                 findings.append((Path(f"agents/{name}"), "warning", "missing directory"))
         return findings
@@ -188,7 +194,7 @@ def check_structure(root: Path, payload_mode: bool):
         findings.append((Path(".agents"), "error", "missing directory"))
     if not (root / ".agents" / "config.yaml").is_file():
         findings.append((Path(".agents/config.yaml"), "error", "missing"))
-    for name in ("rules", "skills", "prompts", "agents", "scripts"):
+    for name in ("rules", "skills", "prompts", "agents", "references", "scripts"):
         if not (root / ".agents" / name).is_dir():
             findings.append((Path(f".agents/{name}"), "warning", "missing directory"))
     return findings
@@ -239,6 +245,12 @@ def check_naming(root: Path, payload_mode: bool):
     for path in walk_dir(base / "rules"):
         if not path.name.endswith(".rule.md"):
             findings.append((path, "error", "rule file must end with .rule.md"))
+
+    for path in walk_dir(base / "references"):
+        if not path.name.endswith(".reference.md"):
+            findings.append(
+                (path, "error", "reference file must end with .reference.md")
+            )
 
     for kind, mapping in seen.items():
         for name, paths in mapping.items():
@@ -314,6 +326,8 @@ def check_references(root: Path, payload_mode: bool):
         for match in REFERENCE.finditer(text):
             reference = match.group(0).rstrip(".,;:)`'\"")
             if reference in REFERENCE_EXEMPT:
+                continue
+            if reference.startswith(REFERENCE_EXEMPT_PREFIXES):
                 continue
             if not resolve_reference(root, reference, payload_mode).exists():
                 findings.append(

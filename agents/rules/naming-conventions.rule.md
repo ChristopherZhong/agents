@@ -87,11 +87,25 @@ Workflow reference:
 - `.agents/skills/<verb>-<noun>/SKILL.md`
 ```
 
+## Reference documents
+
+Reference documents use `<topic>.reference.md` under `.agents/references/`:
+
+- ✅ `ears.reference.md` — Requirements syntax standard
+- ✅ `asd-ste100.reference.md` — Technical prose standard
+- ❌ `reference-ears.md` — Wrong: redundant prefix
+- ❌ `ears.md` — Wrong: missing `.reference.md` suffix
+- ❌ `EARS.reference.md` — Wrong: not lowercase
+
+Use a reference document for durable standards that a workflow loads on demand.
+Do not use it for repository behavior; put rules in `.agents/rules/`.
+
 ## When to Apply These Rules
 
 - **New skills:** Always use `<verb>-<noun>` format and create a corresponding `.agents/rules/` entry if patterns differ
 - **New agents:** Always use `<workflow>-<actor>` format
 - **New prompts:** Name after the skill or use a descriptive action phrase; always include workflow reference
+- **New reference documents:** Use `<topic>.reference.md` and load them only when a workflow needs them
 - **Existing assets:** Migrate to these conventions during refactoring or when renamed for clarity
 
 ## Examples
@@ -105,6 +119,7 @@ Workflow reference:
 | Agent | `ai-assets-maintainer.agent.md` | `<workflow>-<actor>` |
 | Prompt | `documentation-review.prompt.md` | Descriptive phrase |
 | Rule | `markdown.rule.md` | `<topic>.rule.md` |
+| Reference | `ears.reference.md` | `<topic>.reference.md` |
 
 The directory itself is the authoritative list. Do not enumerate every asset
 in this rule.

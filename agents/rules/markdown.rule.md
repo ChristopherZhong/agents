@@ -14,19 +14,15 @@ paths:
 
 ### ASD-STE100 Simplified Technical English
 
-- When writing documentation, apply ASD-STE100 Simplified Technical English principles:
-  - Use controlled, approved vocabulary; avoid synonyms and jargon.
-  - Keep sentences short and state one idea per sentence.
-  - Use active voice and the present tense.
-  - Avoid ambiguous words, idioms, and noun strings.
-  - Write so the meaning is clear to non-native English speakers.
+- Apply ASD-STE100 to durable technical prose. Read
+  `.agents/references/asd-ste100.reference.md` before writing or reviewing a technical
+  document.
+- Use the active voice, the present tense, short sentences, and one idea per
+  sentence.
 
 ### EARS (Easy Approach to Requirements Syntax)
 
-- When documenting requirements, use EARS syntax so each requirement is precise, testable, and consistent:
-  - **Statement:** "The system shall <action> <object>."
-  - **Trigger:** "The system shall <action> <object> when <condition>."
-  - **State:** "The system shall <action> <object> while <condition>."
-  - **Event-driven (after/before):** "The system shall <action> <object> after <event>." / "before <event>."
-  - **Optional measure:** "The system shall <action> <object> <measure>."
-  - Every requirement must contain exactly one testable obligation (`shall`).
+- Use EARS for behavioral requirements. Read `.agents/references/ears.reference.md` before
+  writing or reviewing requirements.
+- Every requirement names one system, contains one `SHALL`, and states one
+  testable obligation.
