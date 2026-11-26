@@ -1,6 +1,6 @@
 ---
 name: conduct-interview
-description: Interview the user persistently with targeted, follow-up questions until reaching shared understanding of a topic, requirement, or decision.
+description: Interviews the user persistently with targeted follow-up questions until reaching shared understanding of a topic, requirement, or decision.
 ---
 
 # Relentless Interview
@@ -15,6 +15,43 @@ Use this skill when you need to extract clarity from a vague request, ambiguous 
 - Validating assumptions before making significant changes
 - Gathering requirements when the user's intent is only partially clear
 - Drilling into a decision to expose unstated constraints or concerns
+
+## Question template
+
+Use this structure for each turn:
+
+```markdown
+Current understanding: [one to three sentences]
+
+Why this matters: [concrete dependency or risk]
+
+Recommended answer: [choice grounded in repository evidence when possible]
+
+Question: [one question only]
+```
+
+## Specification review mode
+
+Use this mode when the user asks to find or resolve gaps, inconsistencies, or
+ambiguities in a product requirements document (PRD), an engineering design
+document (EDD), or another draft specification.
+
+1. Read the whole document and build an internal backlog ordered by dependency.
+   Do not print the backlog.
+1. Read `.agents/references/ears.reference.md` and `.agents/references/asd-ste100.reference.md`.
+   Compare the document with `.agents/skills/create-prd/prd-template.md` or
+   `.agents/skills/create-edd/edd-template.md`.
+1. Treat a missing or invalid EARS requirement as a review item.
+1. Treat unclear or multi-topic prose as an STE review item when it blocks
+   shared understanding.
+1. Present only the current item. Never lead with a numbered list of every
+   issue.
+1. After each answer, mark the item resolved or deferred and continue with the
+   next item.
+1. When the backlog is empty, summarize the decisions and offer to update the
+   document.
+
+A consolidated report is allowed only when the user asks for a full audit.
 
 ## Workflow
 
@@ -51,6 +88,35 @@ Use this skill when you need to extract clarity from a vague request, ambiguous 
 - **Surface hidden constraints:** Often the real issue is unstated constraints (budget, timeline, skill, dependencies). Probe for them.
 - **No assumptions:** If you're uncertain, ask. Never infer when clarification is available.
 - **Persistence with respect:** Keep asking until clarity emerges, but remain respectful and collaborative.
+
+## Grounding
+
+- Explore the repository before asking a factual question.
+- Use `.agents/rules/`, `docs/`, `README.md`, tests, and configuration to answer
+  what already exists.
+- Ask the user only for intent, trade-offs, priorities, domain meaning, or
+  choices that the repository cannot answer.
+- Cite the files and symbols you verified.
+
+## Recast agreed text
+
+- When the user agrees on behavior, rewrite it as an EARS sentence per
+  `.agents/references/ears.reference.md` before you treat the item as resolved. Write the
+  non-keyword wording in STE.
+- When the user agrees on background, architecture, or procedure text, rewrite
+  it in ASD-STE100 per `.agents/references/asd-ste100.reference.md` before you treat the
+  item as resolved.
+
+## Durable decisions
+
+- Update the nearest existing canonical file when a durable decision or term
+  emerges. Prefer `.agents/rules/` for repository behavior and `docs/` for
+  governance.
+- Create a file only when the information does not fit an existing file.
+- Offer an ADR only when all three conditions in
+  `.agents/skills/create-adr/SKILL.md` are true. Otherwise, skip the ADR.
+- Do not record temporary brainstorming or facts that are obvious from nearby
+  code.
 
 ## Output Expectations
 

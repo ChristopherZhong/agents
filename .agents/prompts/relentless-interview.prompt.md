@@ -12,6 +12,8 @@ Requirements:
 - Follow the direction my answers take—don't follow a preset list.
 - Persist until we both articulate the same mental model.
 - Surface unstated constraints and hidden assumptions.
+- For a specification review, raise one gap at a time and recast agreed text
+  into EARS and STE.
 - Remain collaborative and respectful throughout.
 
 Output format:
