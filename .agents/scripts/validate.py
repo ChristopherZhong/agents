@@ -156,14 +156,47 @@ def assets_base(root: Path, payload_mode: bool) -> Path:
     return root / "agents" if payload_mode else root / ".agents"
 
 
-def resolve_reference(root: Path, reference: str, payload_mode: bool) -> Path:
-    """Map a .agents/ reference to the file that should exist."""
+def optional_base(root: Path) -> Path | None:
+    """The opt-in bundle root, when it exists."""
+    path = root / "optional"
+    return path if path.is_dir() else None
+
+
+def asset_bases(root: Path, payload_mode: bool) -> list[tuple[Path, bool]]:
+    """Return (base, is_optional) pairs to scan.
+
+    The optional tree is checked for layout, naming, frontmatter, and
+    references. It is exempt from genericity and self-sync because it exists
+    to hold platform and stack assets on purpose.
+    """
+    bases = [(assets_base(root, payload_mode), False)]
+    if payload_mode:
+        optional = optional_base(root)
+        if optional is not None:
+            bases.append((optional, True))
+    return bases
+
+
+def resolve_reference(
+    root: Path, reference: str, payload_mode: bool, is_optional: bool = False
+) -> Path:
+    """Map a .agents/ reference to the file that should exist.
+
+    An optional asset may point at a core asset or at another optional asset.
+    The core tree is checked first, then the optional tree.
+    """
     if not payload_mode:
         return root / reference
     if reference == ".agents/AGENTS.md":
         return root / "agents" / "AGENTS.md"
     if reference.startswith(".agents/"):
-        return root / "agents" / reference[len(".agents/"):]
+        relative = reference[len(".agents/"):]
+        candidate = root / "agents" / relative
+        if is_optional and not candidate.exists():
+            alternative = root / "optional" / relative
+            if alternative.exists():
+                return alternative
+        return candidate
     return root / reference
 
 
@@ -186,6 +219,13 @@ def check_structure(root: Path, payload_mode: bool):
         for name in ("rules", "skills", "prompts", "agents", "references", "scripts"):
             if not (payload / name).is_dir():
                 findings.append((Path(f"agents/{name}"), "warning", "missing directory"))
+        optional = optional_base(root)
+        if optional is not None:
+            for name in ("skills", "prompts", "agents", "references"):
+                if not (optional / name).is_dir():
+                    findings.append(
+                        (Path(f"optional/{name}"), "warning", "missing directory")
+                    )
         return findings
 
     if not (root / "AGENTS.md").is_file():
@@ -203,54 +243,54 @@ def check_structure(root: Path, payload_mode: bool):
 def check_naming(root: Path, payload_mode: bool):
     findings = []
     seen: dict[str, dict[str, list[Path]]] = {}
-    base = assets_base(root, payload_mode)
 
-    for path in walk_dir(base / "skills"):
-        if path.name != "SKILL.md":
-            continue
-        directory = path.parent.name
-        if not KEBAB.match(directory):
-            findings.append(
-                (path, "error", f"skill directory '{directory}' is not <verb>-<noun>")
-            )
-        declared = read_frontmatter(path).get("name")
-        if declared and declared != directory:
-            findings.append(
-                (path, "error", f"name '{declared}' does not match directory '{directory}'")
-            )
-        if declared:
-            seen.setdefault("skill", {}).setdefault(str(declared), []).append(path)
+    for base, _ in asset_bases(root, payload_mode):
+        for path in walk_dir(base / "skills"):
+            if path.name != "SKILL.md":
+                continue
+            directory = path.parent.name
+            if not KEBAB.match(directory):
+                findings.append(
+                    (path, "error", f"skill directory '{directory}' is not <verb>-<noun>")
+                )
+            declared = read_frontmatter(path).get("name")
+            if declared and declared != directory:
+                findings.append(
+                    (path, "error", f"name '{declared}' does not match directory '{directory}'")
+                )
+            if declared:
+                seen.setdefault("skill", {}).setdefault(str(declared), []).append(path)
 
-    for path in walk_dir(base / "agents"):
-        if not path.name.endswith(".agent.md"):
-            findings.append((path, "error", "agent file must end with .agent.md"))
-            continue
-        stem = path.name[: -len(".agent.md")]
-        if not KEBAB.match(stem):
-            findings.append(
-                (path, "error", f"agent name '{stem}' is not <workflow>-<actor>")
-            )
-        declared = read_frontmatter(path).get("name")
-        if declared and declared != stem:
-            findings.append(
-                (path, "error", f"name '{declared}' does not match filename '{stem}'")
-            )
-        if declared:
-            seen.setdefault("agent", {}).setdefault(str(declared), []).append(path)
+        for path in walk_dir(base / "agents"):
+            if not path.name.endswith(".agent.md"):
+                findings.append((path, "error", "agent file must end with .agent.md"))
+                continue
+            stem = path.name[: -len(".agent.md")]
+            if not KEBAB.match(stem):
+                findings.append(
+                    (path, "error", f"agent name '{stem}' is not <workflow>-<actor>")
+                )
+            declared = read_frontmatter(path).get("name")
+            if declared and declared != stem:
+                findings.append(
+                    (path, "error", f"name '{declared}' does not match filename '{stem}'")
+                )
+            if declared:
+                seen.setdefault("agent", {}).setdefault(str(declared), []).append(path)
 
-    for path in walk_dir(base / "prompts"):
-        if not path.name.endswith(".prompt.md"):
-            findings.append((path, "error", "prompt file must end with .prompt.md"))
+        for path in walk_dir(base / "prompts"):
+            if not path.name.endswith(".prompt.md"):
+                findings.append((path, "error", "prompt file must end with .prompt.md"))
 
-    for path in walk_dir(base / "rules"):
-        if not path.name.endswith(".rule.md"):
-            findings.append((path, "error", "rule file must end with .rule.md"))
+        for path in walk_dir(base / "rules"):
+            if not path.name.endswith(".rule.md"):
+                findings.append((path, "error", "rule file must end with .rule.md"))
 
-    for path in walk_dir(base / "references"):
-        if not path.name.endswith(".reference.md"):
-            findings.append(
-                (path, "error", "reference file must end with .reference.md")
-            )
+        for path in walk_dir(base / "references"):
+            if not path.name.endswith(".reference.md"):
+                findings.append(
+                    (path, "error", "reference file must end with .reference.md")
+                )
 
     for kind, mapping in seen.items():
         for name, paths in mapping.items():
@@ -262,36 +302,36 @@ def check_naming(root: Path, payload_mode: bool):
 
 def check_frontmatter(root: Path, payload_mode: bool):
     findings = []
-    base = assets_base(root, payload_mode)
 
-    for path in walk_dir(base / "skills"):
-        if path.name != "SKILL.md":
-            continue
-        meta = read_frontmatter(path)
-        for key in ("name", "description"):
-            if not meta.get(key):
-                findings.append((path, "error", f"missing frontmatter '{key}'"))
-        for key in sorted(FORBIDDEN_FRONTMATTER):
-            if key in meta:
-                findings.append(
-                    (path, "error", f"frontmatter must not declare '{key}'")
-                )
+    for base, _ in asset_bases(root, payload_mode):
+        for path in walk_dir(base / "skills"):
+            if path.name != "SKILL.md":
+                continue
+            meta = read_frontmatter(path)
+            for key in ("name", "description"):
+                if not meta.get(key):
+                    findings.append((path, "error", f"missing frontmatter '{key}'"))
+            for key in sorted(FORBIDDEN_FRONTMATTER):
+                if key in meta:
+                    findings.append(
+                        (path, "error", f"frontmatter must not declare '{key}'")
+                    )
 
-    for path in walk_dir(base / "agents"):
-        if not path.name.endswith(".agent.md"):
-            continue
-        meta = read_frontmatter(path)
-        for key in ("name", "description"):
-            if not meta.get(key):
-                findings.append((path, "error", f"missing frontmatter '{key}'"))
-        for key in ("scope", "inputs", "outputs"):
-            if not meta.get(key):
-                findings.append((path, "warning", f"missing frontmatter '{key}'"))
-        for key in sorted(FORBIDDEN_FRONTMATTER):
-            if key in meta:
-                findings.append(
-                    (path, "error", f"frontmatter must not declare '{key}'")
-                )
+        for path in walk_dir(base / "agents"):
+            if not path.name.endswith(".agent.md"):
+                continue
+            meta = read_frontmatter(path)
+            for key in ("name", "description"):
+                if not meta.get(key):
+                    findings.append((path, "error", f"missing frontmatter '{key}'"))
+            for key in ("scope", "inputs", "outputs"):
+                if not meta.get(key):
+                    findings.append((path, "warning", f"missing frontmatter '{key}'"))
+            for key in sorted(FORBIDDEN_FRONTMATTER):
+                if key in meta:
+                    findings.append(
+                        (path, "error", f"frontmatter must not declare '{key}'")
+                    )
 
     return findings
 
@@ -299,55 +339,60 @@ def check_frontmatter(root: Path, payload_mode: bool):
 def check_markdown_lists(root: Path, payload_mode: bool):
     """Ordered lists use 1. for every item, per the markdown rule."""
     findings = []
-    for path in walk_dir(assets_base(root, payload_mode)):
-        if path.suffix != ".md":
-            continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
-            continue
-        for number, line in enumerate(text.splitlines(), start=1):
-            if EXPLICIT_ORDER.match(line):
-                findings.append(
-                    (path, "error", f"ordered list must use '1.' on line {number}")
-                )
+    for base, _ in asset_bases(root, payload_mode):
+        for path in walk_dir(base):
+            if path.suffix != ".md":
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            for number, line in enumerate(text.splitlines(), start=1):
+                if EXPLICIT_ORDER.match(line):
+                    findings.append(
+                        (path, "error", f"ordered list must use '1.' on line {number}")
+                    )
     return findings
 
 
 def check_references(root: Path, payload_mode: bool):
     findings = []
-    for path in walk_dir(assets_base(root, payload_mode)):
-        if path.suffix != ".md":
-            continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
-            continue
-        for match in REFERENCE.finditer(text):
-            reference = match.group(0).rstrip(".,;:)`'\"")
-            if reference in REFERENCE_EXEMPT:
+    for base, is_optional in asset_bases(root, payload_mode):
+        for path in walk_dir(base):
+            if path.suffix != ".md":
                 continue
-            if reference.startswith(REFERENCE_EXEMPT_PREFIXES):
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
                 continue
-            if not resolve_reference(root, reference, payload_mode).exists():
-                findings.append(
-                    (path, "warning", f"reference not found: {reference}")
-                )
+            for match in REFERENCE.finditer(text):
+                reference = match.group(0).rstrip(".,;:)`'\"")
+                if reference in REFERENCE_EXEMPT:
+                    continue
+                if reference.startswith(REFERENCE_EXEMPT_PREFIXES):
+                    continue
+                if not resolve_reference(
+                    root, reference, payload_mode, is_optional
+                ).exists():
+                    findings.append(
+                        (path, "warning", f"reference not found: {reference}")
+                    )
     return findings
 
 
 def check_secrets(root: Path, payload_mode: bool):
     findings = []
-    for path in walk_dir(assets_base(root, payload_mode)):
-        if path.suffix not in TEXT_SUFFIXES:
-            continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
-            continue
-        for pattern, label in SECRETS:
-            if re.search(pattern, text):
-                findings.append((path, "error", f"possible secret: {label}"))
+    for base, _ in asset_bases(root, payload_mode):
+        for path in walk_dir(base):
+            if path.suffix not in TEXT_SUFFIXES:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            for pattern, label in SECRETS:
+                if re.search(pattern, text):
+                    findings.append((path, "error", f"possible secret: {label}"))
     return findings
 
 
@@ -459,16 +504,17 @@ def check_payload(root: Path, payload_mode: bool):
         return findings
 
     seen: dict[str, str] = {}
-    for path in walk_dir(payload):
-        target = payload_target(path.relative_to(payload).as_posix())
-        key = target.lower()
-        if key in seen:
-            findings.append(
-                (path, "error", f"target '{target}' collides with '{seen[key]}'")
-            )
-        seen[key] = target
-        if path.stat().st_size == 0:
-            findings.append((path, "warning", "empty file"))
+    for base, _ in asset_bases(root, payload_mode):
+        for path in walk_dir(base):
+            target = payload_target(path.relative_to(base).as_posix())
+            key = target.lower()
+            if key in seen:
+                findings.append(
+                    (path, "error", f"target '{target}' collides with '{seen[key]}'")
+                )
+            seen[key] = target
+            if path.stat().st_size == 0:
+                findings.append((path, "warning", "empty file"))
 
     return findings
 

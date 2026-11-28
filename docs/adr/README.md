@@ -19,3 +19,4 @@ alternatives that were rejected.
 | 0012 | One shipped validator |
 | 0013 | Standards in a references directory |
 | 0014 | Work state layers by durability |
+| 0015 | Optional bundles for platform and stack assets |

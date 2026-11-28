@@ -100,12 +100,20 @@ Reference documents use `<topic>.reference.md` under `.agents/references/`:
 Use a reference document for durable standards that a workflow loads on demand.
 Do not use it for repository behavior; put rules in `.agents/rules/`.
 
+## Optional bundles
+
+The same patterns apply under `optional/`. An optional asset keeps its relative
+path when a consumer copies it into `.agents/`. For example, an optional skill
+or agent keeps the same relative path under `.agents/skills/` or
+`.agents/agents/`. Do not add a bundle-specific directory or a different suffix.
+
 ## When to Apply These Rules
 
 - **New skills:** Always use `<verb>-<noun>` format and create a corresponding `.agents/rules/` entry if patterns differ
 - **New agents:** Always use `<workflow>-<actor>` format
 - **New prompts:** Name after the skill or use a descriptive action phrase; always include workflow reference
 - **New reference documents:** Use `<topic>.reference.md` and load them only when a workflow needs them
+- **Optional assets:** Use the same patterns under `optional/` and keep the relative path
 - **Existing assets:** Migrate to these conventions during refactoring or when renamed for clarity
 
 ## Examples

@@ -19,6 +19,9 @@ Use this skill when you need to verify that the repository's AI asset layout fol
 
 1. Review the repository asset directories and confirm the expected naming conventions.
 1. Run the validator script at `.agents/scripts/validate.py`.
+1. In the upstream harness, confirm the validator also checked `optional/` for
+   naming, frontmatter, and references. Optional bundles are exempt from
+   genericity.
 1. If validation fails, fix the offending file names or layout issues before reporting completion.
 1. Re-run the validator and confirm it passes.
 

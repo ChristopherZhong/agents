@@ -12,6 +12,10 @@ definitions that are useful in any repository, plus the procedure for
 installing and updating them. A repository adopts them by pointing its agent at
 this one.
 
+`optional/` holds opt-in bundles for a named platform or stack. A bundle keeps
+platform-specific workflows out of the generic payload. The consumer copies a
+bundle only when it uses that platform or stack.
+
 ## Start here
 
 Paste this into your agent. The copy button is at the top right of the block.
@@ -57,9 +61,47 @@ The skill is the procedure. There is no binary to install.
 A consumer's own files in `.agents/` are never touched. Only paths that exist
 in the payload are managed.
 
+`optional/` is not part of this mapping. Sync never installs it. Copy a bundle
+into `.agents/` by hand when the repository uses that platform or stack.
+
 The payload does not ship `.agents/context/`, `.agents/docs/`, or
 `.agents/sessions/`. The work-state convention creates them on demand. Session
 notes are not committed.
+
+## Optional bundles
+
+`optional/` is a sibling of `agents/`. It mirrors the payload structure with
+`skills/`, `prompts/`, `agents/`, and `references/`. It is validated for layout,
+naming, frontmatter, and references, but it is exempt from the payload
+genericity rule. A bundle may name a platform or a stack because the consumer
+opts in explicitly.
+
+Available bundles (Group A):
+
+| Bundle | Contents |
+|---|---|
+| Jira | `jira-specialist`, create, enrich, review, and triage skills, auth check, conventions reference, and prompts |
+| GitLab | `gitlab-specialist`, create, update, and review skills, auth check, conventions reference, and prompts |
+
+Deferred bundles:
+
+- Dependency-update merge-request triage (`snyk-renovate`), classified Group C.
+- NestJS and Prisma stack skills and agents.
+- Generic orchestration and a flow runner.
+
+To opt in:
+
+1. Copy the bundle files from `optional/skills/`, `optional/agents/`,
+   `optional/prompts/`, and `optional/references/` into the matching `.agents/`
+   directories.
+1. Record the project values in `.agents/context/` with the format in
+   `.agents/references/context-format.reference.md`. The Jira bundle needs the
+   site, cloud ID, project key, and field metadata. The GitLab bundle needs the
+   host, project path, default branch, and protected branches.
+1. Run `.agents/scripts/validate.py` and confirm the installed tree is valid.
+
+Core assets never reference an optional bundle. An optional asset may reference
+a core asset.
 
 ## Work state
 
@@ -82,7 +124,8 @@ notes are not committed.
 
 | Path | Role |
 |---|---|
-| `agents/` | The payload — the product |
+| `agents/` | The payload — the core product |
+| `optional/` | Opt-in platform and stack bundles, not synced |
 | `.agents/` | This repository's own copy, produced by self-sync |
 | `docs/` | Governance, decisions, support matrix |
 

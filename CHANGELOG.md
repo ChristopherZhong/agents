@@ -29,8 +29,25 @@ This project does not use semantic versions. Consumers pin a commit; see
   and non-goals.
 - ADR 0014 records the work-state layers and the promotion path.
 - Validator detects a stale self-sync copy in payload mode.
+- Optional bundle directory `optional/` as a root sibling of `agents/`. It is
+  not synced and is exempt from payload genericity.
+- Jira optional bundle: `jira-specialist`, `verify-jira-auth`,
+  `create-jira-issue`, `enrich-jira-issue`, `review-jira-issue`,
+  `triage-jira-issue`, a conventions reference, and prompts.
+- GitLab optional bundle: `gitlab-specialist`, `verify-gitlab-auth`,
+  `create-merge-request`, `update-merge-request`, `review-merge-request`, a
+  conventions reference, a merge-request template, and prompts.
+- ADR 0015 records the optional bundle boundary.
+- Group A is the Jira and GitLab bundles. Group C keeps `snyk-renovate`
+  dependency-update triage out for now.
 
 ### Changed
+
+- The validator scans `optional/` for layout, naming, frontmatter, lists,
+  references, and secrets, but skips genericity and self-sync.
+- `sync-agents` states that `optional/` is not installed automatically.
+- `CONTRIBUTING.md`, `README.md`, and the naming rule document the optional
+  boundary.
 
 - `markdown.rule.md` now points at the canonical standards instead of repeating
   them.

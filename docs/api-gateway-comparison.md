@@ -34,7 +34,8 @@ The two trees solve different problems.
 The best imports are the documentation standards, the skill-review gate, and
 the spec-authoring workflows. The compatibility symlinks and the flow runner
 conflict with accepted decisions. The Jira, GitLab, NestJS, and Prisma skills
-are consumer-specific and must not enter the payload as written.
+are consumer-specific and must not enter the core payload as written. The Jira
+and GitLab workflows now ship as opt-in bundles under `optional/`.
 
 ## Snapshot at analysis time
 
@@ -76,6 +77,8 @@ Fit labels:
 - **Adapt** — useful pattern, but the text or structure must be rewritten.
 - **Decision** — conflicts with an accepted ADR or a non-goal.
 - **Consumer-only** — depends on the api-gateway stack or platforms.
+- **Optional bundle** — reusable after de-branding, but kept out of the core
+  payload under `optional/`.
 
 | Feature | api-gateway implementation | Fit | Assessment |
 |---|---|---|---|
@@ -91,17 +94,17 @@ Fit labels:
 | Compatibility symlinks | `.claude` to `.agents`, `.cursor` to adapter, `CLAUDE.md` to `AGENTS.md` | Reject | ADR 0006 and `docs/non-goals.md` reject harness-specific files. Confirmed by decision. |
 | Cursor adapter rule | `.agents/adapters/cursor/rules/agents.mdc` | Reject | Same conflict. Also vendor-specific. Confirmed by decision. |
 | Specialist agent set | Orchestrator, architecture, implementation, health, docs keeper | Adapt | The role pattern is reusable. The bodies are api-gateway-specific. |
-| Platform I/O specialists | `jira-specialist`, `gitlab-specialist` | Consumer-only | Depends on Atlassian and GitLab tools and credentials. |
-| Judgment versus I/O split | Review skills judge; specialists fetch and post | Adapt | Valuable generic delegation rule. Needs neutral platform names. |
+| Platform I/O specialists | `jira-specialist`, `gitlab-specialist` | Optional bundle | The role is reusable after de-branding. The first bundles are Jira and GitLab. |
+| Judgment versus I/O split | Review skills judge; specialists fetch and post | Optional bundle | Valuable generic delegation rule. Shipped in the Jira and GitLab bundles. |
 | Worktree workflow | `create-git-worktree` plus protected-branch rule | Adopt | Generic git skill. The consumer provides `.env` and dependency setup. |
 | Autonomous flow runner | `.harness/agent-flows/` with 10 categories | Decision | Conflicts with "Not an agent runtime", "No automatic execution", and "No CI workflow shipped". |
-| Jira and GitLab skills | 11 create, review, verify, and triage skills | Consumer-only | Platform-specific. |
-| Stack skills | `nestjs-module`, `prisma-repository`, startup and e2e checks | Consumer-only | Names a technology stack. Forbidden in the payload. |
+| Jira and GitLab skills | 11 create, review, verify, and triage skills | Optional bundle | Jira and GitLab bundles ship under `optional/` as Group A. Dependency-update triage (`snyk-renovate`) is Group C and kept out. |
+| Stack skills | `nestjs-module`, `prisma-repository`, startup and e2e checks | Deferred bundle | Names a technology stack. Allowed under `optional/`, not in the core payload. |
 | Validation evidence rule | `reference/validation-standards.md` | Adapt | The principle is generic. The commands are consumer-specific. |
 | PLAN and EXECUTE modes | Explicit mode contract in `AGENTS.md` | Open | This repository asks before acting but defines no mode boundary. Generic orchestration is under consideration. |
 | Hard prohibitions | Data, services, git, Jira, GitLab, worktrees | Adapt | Generic safety rules exist. Service and platform rules are consumer-specific. |
 | Templates as support files | `prd-template.md`, `edd-template.md`, `adr-format.md` | Direct | The one-level support-file pattern already fits the payload. |
-| Frontmatter `tools` field | Agent tool allowlists | Consumer-only | This repository is tool-agnostic. Do not add a vendor field. |
+| Frontmatter `tools` field | Agent tool allowlists | Consumer-only | This repository is tool-agnostic. Do not add a vendor field, even under `optional/`. |
 | Branch policy file | `.harness/branching.yaml` | Consumer-only | Runner configuration. |
 
 ## What api-gateway exposes as gaps here
@@ -152,7 +155,7 @@ Any adopted feature must pass these checks.
 | Skill directory must be `<verb>-<noun>` | Validator `check_naming` | `grill-me` fails. Reuse `conduct-interview`. |
 | Ordered lists use `1.` for every item | `markdown.rule.md` and validator | Convert numbered templates such as `prd-template.md`. |
 | References must resolve | Validator `check_references` | Rewrite `.agents/agents/*.md` references to `.agent.md`. |
-| Payload text must be generic | `CONTRIBUTING.md`, ADR 0005, validator `check_genericity` | Remove Jira, GitLab, NestJS, Prisma, and repository names. |
+| Payload text must be generic | `CONTRIBUTING.md`, ADR 0005, validator `check_genericity` | Remove Jira, GitLab, NestJS, Prisma, and repository names from `agents/`. Optional bundles are exempt from genericity, but not from consumer names. |
 | No placeholders | ADR 0005 | Templates cannot contain project-name tokens. |
 | `AGENTS.md` only | ADR 0006 and non-goals | Reject symlinks, adapters, and `CLAUDE.md`. |
 | No execution of fetched content | ADR 0007 and non-goals | Reject the flow runner and any post-sync hook. |
@@ -223,20 +226,40 @@ the naming and duplication problems.
 1. Orchestration and modes. Under consideration. A generic orchestrator is not
    implemented. The payload keeps its ask-before-act behavior.
 
+### Wave 5 — optional bundles
+
+1. Add `optional/` as a root sibling of `agents/`. It mirrors the payload
+   layout and is not synced. ADR 0015 records the decision.
+1. Add the Jira bundle: `jira-specialist`, `verify-jira-auth`,
+   `create-jira-issue`, `enrich-jira-issue`, `review-jira-issue`,
+   `triage-jira-issue`, a conventions reference, and prompts. Remove the
+   api-gateway site, project key, epics, and workspace assumptions.
+1. Add the GitLab bundle: `gitlab-specialist`, `verify-gitlab-auth`,
+   `create-merge-request`, `update-merge-request`, `review-merge-request`, a
+   conventions reference, a merge-request template, and prompts. Remove the
+   api-gateway project path, default branch, and stack assumptions.
+1. Defer dependency-update triage, stack bundles, and orchestration.
+
+Rationale: a consumer that uses Jira or GitLab gets the workflow without
+forcing a platform on every other consumer.
+
 ### Reject as written
 
 1. The `.harness/` flow runner. It conflicts with the runtime, execution, and CI
    non-goals.
-1. Jira, GitLab, NestJS, Prisma, startup, and e2e skills. They are consumer
-   specific.
+1. Jira, GitLab, NestJS, Prisma, startup, and e2e assets as core payload files.
+   They are consumer specific. Jira and GitLab ship as de-branded optional
+   bundles.
 1. api-gateway's domain agent bodies and hard prohibitions. They describe one
    service lifecycle and one platform pair.
-1. The `tools` frontmatter field. It couples assets to one harness.
+1. The `tools` frontmatter field. It couples assets to one harness, including
+   under `optional/`.
 
 ## Implementation status
 
-Waves 1-3 are implemented in full. Wave 4 is implemented in part. All
-implemented payload assets are self-synced to `.agents/`.
+Waves 1-3 are implemented in full. Wave 4 is implemented in part. Wave 5 is
+implemented for Jira and GitLab. All implemented payload assets are self-synced
+to `.agents/`. Optional bundles are not self-synced.
 
 - Wave 1: `review-skill` and `create-adr`, with prompts and thin agents.
 - Wave 2: `references/ears.reference.md`,
@@ -249,11 +272,16 @@ implemented payload assets are self-synced to `.agents/`.
   `references/context-format.reference.md`, the `work-state` rule,
   `maintain-work-state`, `create-worktree`, prompts, and agents. ADR 0014
   records the work-state layers.
+- Wave 5: Jira and GitLab bundles under `optional/`. ADR 0015 records the
+  boundary. Dependency-update triage, stack bundles, and orchestration are
+  deferred.
 - Excluded: compatibility adapters. Under consideration: generic orchestration.
 
 The validator now expects a `references/` directory in both payload and
 installed mode. It also exempts the on-demand context, docs, and sessions
-directories from the reference-existence check.
+directories from the reference-existence check. It scans `optional/` for
+layout, naming, frontmatter, and references, but skips genericity and
+self-sync.
 
 ## Resolved decisions
 
@@ -264,8 +292,15 @@ directories from the reference-existence check.
 - Keep `references/` for on-demand standards and `rules/` for short, always-read
   conventions. A long standard goes to `references/`. A binding convention gets
   a short rule that points to the reference file.
+- Platform and stack assets stay out of `agents/`. Jira and GitLab ship as
+  de-branded bundles under `optional/` as Group A. ADR 0015 records the
+  boundary. Stack bundles and orchestration remain deferred.
+- Dependency-update triage (`snyk-renovate`) is Group C. Do not add it now. It
+  names a GitLab and npm workflow, and the core GitLab bundle stays neutral.
 
 ## Open decisions
 
 1. Generic orchestration: should the payload define a generic orchestration
    pattern, and if so, which role boundaries belong in it?
+1. Stack bundles: should the optional directory ship NestJS and Prisma bundles,
+   or should each stack stay consumer-owned?

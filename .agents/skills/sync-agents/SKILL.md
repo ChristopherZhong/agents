@@ -74,6 +74,9 @@ agents/AGENTS.md  -> AGENTS.md
 agents/<path>     -> .agents/<path>
 ```
 
+`optional/` is not part of this mapping. Never install an optional bundle
+automatically. A consumer copies a bundle by hand.
+
 ## Step 4 — Classify
 
 Skip every path in `exclude`. Never create, modify, or report an excluded

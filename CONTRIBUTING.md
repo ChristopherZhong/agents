@@ -2,10 +2,11 @@
 
 ## What the product is
 
-`agents/` is the product. Everything else — `README.md`, `docs/`, `/.agents/`,
-`/AGENTS.md` — supports it.
+`agents/` is the core product. `optional/` holds opt-in bundles for a named
+platform or stack. Everything else — `README.md`, `docs/`, `/.agents/`,
+`/AGENTS.md` — supports them.
 
-A change that does not affect `agents/` does not reach consumers.
+A change that does not affect `agents/` or `optional/` does not reach consumers.
 
 ## Rules that cannot be broken
 
@@ -15,8 +16,12 @@ Nothing under `agents/` may name a repository, host, organization, product,
 technology stack, or directory belonging to one consumer. Write "this
 repository", not a name.
 
-The validator fails on a denylist. A passing run is necessary, not sufficient.
-Review the diff for anything a consumer would find irrelevant.
+`optional/` may name a platform or a stack because the consumer opts in
+explicitly. It still must not name a consumer's repository, host, organization,
+product, or project key. Write "the project key", not a value.
+
+The validator fails on a denylist for `agents/`. A passing run is necessary, not
+sufficient. Review the diff for anything a consumer would find irrelevant.
 
 ### One file per rule
 
@@ -38,6 +43,9 @@ Follow `.agents/rules/naming-conventions.rule.md`:
 - Rules: `<topic>.rule.md`
 - Reference documents: `<topic>.reference.md` under `agents/references/`
 
+The same patterns apply under `optional/`. An optional asset keeps the same
+relative path when a consumer copies it into `.agents/`.
+
 ### No declared state
 
 Do not add a `mode` field, an id, or any other state marker to frontmatter. A
@@ -46,14 +54,25 @@ disk. The validator rejects `mode`.
 
 ## Adding or changing an asset
 
+For a core asset:
+
 1. Edit or add files under `agents/`.
 1. Run `python3 .agents/scripts/validate.py --strict`.
 1. Commit the payload: `feat: add <asset> to the payload`.
 1. Run the `sync-agents` skill to refresh `/.agents/` and `/AGENTS.md`.
 1. Commit the self-synced copy: `chore: self-sync .agents`.
 
-Steps 3 and 4 are separate commits because sync reads the payload from a
-commit. See `docs/adr/0004-commit-pinned-sync.md`.
+For an optional bundle:
+
+1. Edit or add files under `optional/`.
+1. Keep the bundle self-contained. A core asset must not reference it.
+1. Run `python3 .agents/scripts/validate.py --strict`. The validator checks
+   optional naming, frontmatter, and references, but skips genericity.
+1. Do not self-sync it. Optional assets are copied by the consumer.
+1. Commit the bundle: `feat: add <platform> optional bundle`.
+
+Steps 3 and 4 for a core asset are separate commits because sync reads the
+payload from a commit. See `docs/adr/0004-commit-pinned-sync.md`.
 
 ## Deprecating an asset
 

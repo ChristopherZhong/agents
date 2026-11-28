@@ -25,7 +25,16 @@ harness does not read `AGENTS.md` may add a pointer manually.
 
 Tool neutrality is binding. The payload does not add harness-specific fields,
 adapters, or generated files. A consumer may add its own outside the managed
-paths.
+paths. This applies to `optional/` as well.
+
+## No platform or stack assets in the core payload
+
+Jira, GitLab, and framework-specific workflows do not enter `agents/`. They may
+ship under `optional/` as opt-in bundles. A bundle keeps the generic payload
+portable. The consumer copies a bundle only when it uses that platform or stack.
+
+An optional bundle may name a platform or a stack. It must not name a consumer's
+repository, host, organization, product, or project key.
 
 ## Not a package manager
 
